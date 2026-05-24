@@ -1,56 +1,95 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useContext, useEffect} from 'react';
 import { useParams, useNavigate, Link} from 'react-router-dom';
 import axios from 'axios';
+import { PassContext } from '../context/PassContext';
 
 const Detail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const [pass, setPass] = useState(null);
+    const {currentPass, setCurrentPass} = useContext(PassContext);
+    const [error, setError] = useState('');
 
     useEffect(() => {
         axios.get(`http://localhost:5000/passes/${id}`)
-            .then(response => setPass(response.data))
-            .catch(error => console.error("Ошибка загрузки пропуска: ", error));
-    }, [id]);
+            .then(response => {setCurrentPass(response.data); setError('');})
+            .catch(error => {
+                console.error("Ошибка получения данных: ", error);
+                if (error.response) {
+                    const status = error.response.status;
+                    if (status === 400) {
+                        setError("Ошибка 400: Bad Request");
+                    } else if (status === 404) {
+                        setError("Ошибка 404: Not Found");
+                    } else if (status === 500) {
+                        setError("Ошибка 500: Internal Server Error");
+                    } else {
+                        setError(`Ошибка: код ${status}`);
+                    }
+                } else {
+                    setError("Ошибка: не удалось подключится к серверу");
+                }
+            });
+    }, [id, setCurrentPass]);
 
     const handleDelete = () => {
         if (window.confirm("Вы уверены, что хотите удалить данный пропуск?")) {
             axios.delete(`http://localhost:5000/passes/${id}`)
                 .then(() => {
                     alert("Пропуск удален");
+                    setError('');
                     navigate('/');
                 })
-                .catch(error => console.error("Ошибка удаления:", error));
+                .catch(error => {
+                    console.error("Ошибка удаления: ", error);
+                    if (error.response) {
+                        const status = error.response.status;
+                        if (status === 400) {
+                            setError("Ошибка 400: Bad Request");
+                        } else if (status === 404) {
+                            setError("Ошибка 404: Not Found");
+                        } else if (status === 500) {
+                            setError("Ошибка 500: Internal Server Error");
+                        } else {
+                            setError(`Ошибка: код ${status}`);
+                        }
+                    } else {
+                        setError("Ошибка: не удалось подключиться к серверу");
+                    }
+                });
         }
     };
 
-    if (!pass) {
+    if (!currentPass) {
         return <div>Загрузка информации о пропуске N{id}...</div>;
     }
 
     return (
-        <div>
+        <div className="container">
             <h1>Информация о пропуске {id}</h1>
-            <div style={{border: '1px solid #ccc', padding: '15px', width: '400px', backgroundColor: '#f9f9f9'}}>
-                <p><strong>ФИО Владельца: </strong>{pass.owner} </p>
-                <p><strong>Зона доступа: </strong>{pass.accessZone}</p>
-                <p><strong>Статус: </strong>{pass.status}</p>
+            <div className="detail-card">
+                <p><strong>ФИО Владельца: </strong>{currentPass.owner} </p>
+                <p><strong>Зона доступа: </strong>{currentPass.accessZone}</p>
+                <p><strong>Статус: </strong>
+                    <span className={`status-badge ${currentPass.status === 'Активен' ? 'status-active' : 'status-canceled'}`}>
+                        {currentPass.status}
+                    </span>
+                </p>
             </div>
 
-            <div style={{marginTop: '20px', display: 'flex', gap: '10px'}}>
-                <Link to={`/edit/${id}`}>
-                    <button style={{ padding: '6px 12px', cursor: 'pointer'}}>
-                        Редактирование
-                    </button>
+            <div className="action-layout">
+                <Link to={`/edit/${id}`} className="btn btn-secondary" style={{textDecoration: 'none'}}>
+                    Редактировать
                 </Link>
-
-                <button onClick={handleDelete} style={{ padding: '6px 12px', backgroundColor: '#ff4d4d', color: 'white', border: 'none', cursor: 'pointer'}}>
-                    Удалить
+                <button onClick={handleDelete} className="btn btn-danger">
+                    Удалить пропуск
                 </button>
             </div>
 
             <br/>
-            <Link to="/">Назад к списку</Link>
+            <Link to="/" className="btn btn-secondary" style={{textDecoration: 'none', display: 'inline-block', marginTop: '10px'}}>
+                Назад к списку
+            </Link>
+            
         </div>
     );
 

@@ -19,10 +19,22 @@
       "status": "Активен"
     },
     {
-      "owner": "Бекренев Иван Андреевич",
-      "accessZone": "Экзамен по ТИМП",
-      "status": "Активен",
+      "owner": "Чуковский Корней Иванович",
+      "accessZone": "Сказочная",
+      "status": "Аннулирован",
       "id": "wFUbyjMrwho"
+    },
+    {
+      "owner": "Сатоши Накамото",
+      "accessZone": "Биткоин",
+      "status": "Активен",
+      "id": "2cdRhcglSEM"
+    },
+    {
+      "owner": "Танжиро Камадо",
+      "accessZone": "Штаб демонов",
+      "status": "Активен",
+      "id": "gMfLv96zJc8"
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"
