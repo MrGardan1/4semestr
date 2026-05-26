@@ -35,7 +35,7 @@ const Form = () => {
             status: "Активен"
         };
 
-        axios.post('http://localhost:5000/passes', JSON.stringify(newPassData), {
+        axios.post('http://217.71.129.139:5754/passes', JSON.stringify(newPassData), {
             headers: {"Content-Type": "application/json"}
         })
             .then(response => {

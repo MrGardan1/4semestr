@@ -10,7 +10,7 @@ const Detail = () => {
     const [error, setError] = useState('');
 
     useEffect(() => {
-        axios.get(`http://localhost:5000/passes/${id}`)
+        axios.get(`http://217.71.129.139:5754/passes/${id}`)
             .then(response => {setCurrentPass(response.data); setError('');})
             .catch(error => {
                 console.error("Ошибка получения данных: ", error);
@@ -33,7 +33,7 @@ const Detail = () => {
 
     const handleDelete = () => {
         if (window.confirm("Вы уверены, что хотите удалить данный пропуск?")) {
-            axios.delete(`http://localhost:5000/passes/${id}`)
+            axios.delete(`http://217.71.129.139:5754/passes/${id}`)
                 .then(() => {
                     alert("Пропуск удален");
                     setError('');

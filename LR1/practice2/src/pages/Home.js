@@ -8,7 +8,7 @@ const Home = () => {
     const [error, setError] = useState('');
 
     useEffect(() => {
-        axios.get("http://localhost:5000/passes")
+        axios.get("http://217.71.129.139:5754/passes")
             .then(response => {setPasses(response.data); setError('');})
             .catch(error => {
                 console.error("Ошибка получения данных:", error);

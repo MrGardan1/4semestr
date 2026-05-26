@@ -15,7 +15,7 @@ const Edit = () => {
     const statusRef = useRef(null);
 
     useEffect(() => {
-        axios.get(`http://localhost:5000/passes/${id}`)
+        axios.get(`http://217.71.129.139:5754/passes/${id}`)
             .then(response => {setCurrentPass(response.data); setError('');})
             .catch(error => {
                 console.error("Ошибка загрузки формы: ", error);
@@ -59,7 +59,7 @@ const Edit = () => {
             status:statusRef.current.value
         };
 
-        axios.put(`http://localhost:5000/passes/${id}`, JSON.stringify(updateData), {
+        axios.put(`http://217.71.129.139:5754/passes/${id}`, JSON.stringify(updateData), {
             headers: {"Content-Type": "application/json"}
         })
         .then(() => {
