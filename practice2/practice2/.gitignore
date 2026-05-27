@@ -1,0 +1,13 @@
+# .gitignore
+
+# Зависимости Node.js
+node_modules/
+
+# Файлы окружения и логи
+.env
+*.log
+npm-debug.log*
+
+# Системные файлы
+.DS_Store
+Thumbs.db
