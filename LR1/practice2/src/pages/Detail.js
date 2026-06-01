@@ -10,51 +10,23 @@ const Detail = () => {
     const [error, setError] = useState('');
 
     useEffect(() => {
-        axios.get(`http://217.71.129.139:5754/passes/${id}`)
+        axios.get(`http://localhost:5754/passes/${id}`)
             .then(response => {setCurrentPass(response.data); setError('');})
             .catch(error => {
-                console.error("Ошибка получения данных: ", error);
-                if (error.response) {
-                    const status = error.response.status;
-                    if (status === 400) {
-                        setError("Ошибка 400: Bad Request");
-                    } else if (status === 404) {
-                        setError("Ошибка 404: Not Found");
-                    } else if (status === 500) {
-                        setError("Ошибка 500: Internal Server Error");
-                    } else {
-                        setError(`Ошибка: код ${status}`);
-                    }
-                } else {
-                    setError("Ошибка: не удалось подключится к серверу");
-                }
+                setError("Ошибка: не удалось загрузить данные с сервера.");
             });
     }, [id, setCurrentPass]);
 
     const handleDelete = () => {
-        if (window.confirm("Вы уверены, что хотите удалить данный пропуск?")) {
-            axios.delete(`http://217.71.129.139:5754/passes/${id}`)
+        if (window.confirm("Вы уверены, что хотите перманентно удалить данный пропуск из базы?")) {
+            axios.delete(`http://localhost:5754/passes/${id}`)
                 .then(() => {
                     alert("Пропуск удален");
                     setError('');
                     navigate('/');
                 })
                 .catch(error => {
-                    console.error("Ошибка удаления: ", error);
-                    if (error.response) {
-                        const status = error.response.status;
-                        if (status === 400) {
-                            setError("Ошибка 400: Bad Request");
-                        } else if (status === 404) {
-                            setError("Ошибка 404: Not Found");
-                        } else if (status === 500) {
-                            setError("Ошибка 500: Internal Server Error");
-                        } else {
-                            setError(`Ошибка: код ${status}`);
-                        }
-                    } else {
-                        setError("Ошибка: не удалось подключиться к серверу");
-                    }
+                    setError("Ошибка: не удалось удалить пропуск.");
                 });
         }
     };
@@ -65,18 +37,28 @@ const Detail = () => {
 
     return (
         <div className="container">
-            <h1>Информация о пропуске {id}</h1>
-            <div className="detail-card">
-                <p><strong>ФИО Владельца: </strong>{currentPass.owner} </p>
-                <p><strong>Зона доступа: </strong>{currentPass.accessZone}</p>
-                <p><strong>Статус: </strong>
+            <h1>Информация о пропуске №{id}</h1>
+            
+            {error && <div className="error-box">{error}</div>}
+
+            <div className="details-card">
+                <p><strong>ФИО Владельца: </strong>{currentPass.owner}</p>
+                <p><strong>Должность: </strong>{currentPass.position}</p>
+                <p><strong>Дата рождения: </strong>{currentPass.birthDate}</p>
+                <hr style={{borderColor: '#e2e8f0', margin: '15px 0'}} />
+                <p><strong>Тип пропуска: </strong>{currentPass.passType}</p>
+                <p><strong>Разрешенная зона: </strong>{currentPass.accessZone}</p>
+                <p><strong>Выдан: </strong>{currentPass.issueDate}</p>
+                <p><strong>Действителен до: </strong>{currentPass.validUntil}</p>
+                <hr style={{borderColor: '#e2e8f0', margin: '15px 0'}} />
+                <p><strong>Текущий статус: </strong>
                     <span className={`status-badge ${currentPass.status === 'Активен' ? 'status-active' : 'status-canceled'}`}>
                         {currentPass.status}
                     </span>
                 </p>
             </div>
 
-            <div className="action-layout">
+            <div className="actions-layout">
                 <Link to={`/edit/${id}`} className="btn btn-secondary" style={{textDecoration: 'none'}}>
                     Редактировать
                 </Link>
@@ -92,7 +74,6 @@ const Detail = () => {
             
         </div>
     );
-
 };
 
 export default Detail;

@@ -3,80 +3,96 @@ import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 
 const Form = () => {
+    const navigate = useNavigate();
     
-    const  navigate = useNavigate();
-    const accessZoneRef = useRef(null);
     const ownerRef = useRef(null);
+    const positionRef = useRef(null);
+    const birthDateRef = useRef(null);
+    const passTypeRef = useRef(null);
+    const accessZoneRef = useRef(null);
+    const issueDateRef = useRef(null);
+    const validUntilRef = useRef(null);
 
-    let newPassData = {};
     const [error, setError] = useState('');
 
     const handleSubmit = (e) => {
-        e.preventDefault();//не перезагружать страницу при отправки данных
+        e.preventDefault();
 
-        const ownerValue = ownerRef.current.value.trim(); //отрезает лишние пробелы по краям
+        const ownerValue = ownerRef.current.value.trim();
         const accessZoneValue = accessZoneRef.current.value.trim();
+        const positionValue = positionRef.current.value.trim();
+        const passTypeValue = passTypeRef.current.value;
+        const issueDateValue = new Date(issueDateRef.current.value);
 
         if (ownerValue.length < 3) {
             setError("Ошибка: ФИО должно содержать минимум 3 буквы");
             return;
         }
 
-        if (accessZoneValue.length < 2) {
-            setError("Ошибка: название зоны доступа слишком короткое");
-            return;
+        let finalValidUntil;
+        // проверяем тип пропуска
+        if (passTypeValue === "Временный") {
+            const threeHoursLater = new Date(issueDateValue.getTime() + 3 * 60 * 60 * 1000);
+            finalValidUntil = threeHoursLater.toISOString(); 
+        } else {
+            finalValidUntil = new Date(validUntilRef.current.value).toISOString();
         }
 
         setError('');
 
-        newPassData = {
+        const newPassData = {
             owner: ownerValue,
+            position: positionValue,
+            birthDate: birthDateRef.current.value,
+            passType: passTypeValue,
             accessZone: accessZoneValue,
+            issueDate: issueDateValue.toISOString(),
+            validUntil: finalValidUntil,
             status: "Активен"
         };
 
-        axios.post('http://217.71.129.139:5754/passes', JSON.stringify(newPassData), {
+        axios.post('http://localhost:5754/passes', JSON.stringify(newPassData), {
             headers: {"Content-Type": "application/json"}
         })
             .then(response => {
-                console.log("Добавлен пропуск: ", response.data);
                 setError('');
                 navigate('/');
             })
             .catch(error => {
-                console.error("Ошибка создания: ", error);
-                if (error.response) {
-                    const status = error.response.status;
-                    if (status === 400) {
-                        setError("Ошибка 400: Bad Request");
-                    } else if (status === 404) {
-                        setError("Ошибка 404: Not Found");
-                    } else if (status === 500) {
-                        setError("Ошибка 500: Internal Server Error");
-                    } else {
-                        setError(`Ошибка: код ${status}`);
-                    }
-                } else {
-                    setError("Ошибка: не удалось подключится к серверу");
-                }
+                setError("Ошибка подключения к серверу. Проверьте сеть.");
             });
     };
 
     return (
         <div className="container">
-
-            {error && (
-                <div className="error-box">
-                    {error}
-                </div>
-            )}
+            <h1>Выдача нового пропуска</h1>
+            {error && <div className="error-box">{error}</div>}
 
             <form onSubmit={handleSubmit} className="form-group">
                 <label>ФИО Владельца:</label>
-                <input type="text" ref={ownerRef} placeholder="Иванов Иван Иванович" required />
+                <input type="text" ref={ownerRef} required />
                 
+                <label>Должность:</label>
+                <input type="text" ref={positionRef} required />
+
+                <label>Дата рождения:</label>
+                <input type="date" ref={birthDateRef} required style={{padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '6px'}} />
+
+                <label>Тип пропуска:</label>
+                <select ref={passTypeRef} required>
+                    <option value="Постоянный">Постоянный</option>
+                    <option value="Временный">Временный (строго на 3 часа)</option>
+                    <option value="Разовый">Разовый</option>
+                </select>
+
                 <label>Зона доступа:</label>
-                <input type="text" ref={accessZoneRef} placeholder="Терминал В, Диспетчерская" required />
+                <input type="text" ref={accessZoneRef} required />
+
+                <label>Время выдачи:</label>
+                <input type="datetime-local" ref={issueDateRef} required style={{padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '6px'}} />
+
+                <label>Действителен до (Игнорируется для временных):</label>
+                <input type="datetime-local" ref={validUntilRef} style={{padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '6px'}} />
 
                 <button type="submit" className="btn btn-primary" style={{ marginTop: '10px'}}>
                     Добавить пропуск
