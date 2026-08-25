@@ -1,0 +1,5 @@
+practice2/practice2/build
+
+*.ovpn
+
+node_modules/
